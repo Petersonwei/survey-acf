@@ -1,0 +1,12 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "survey-responses",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "categoryId", "order": "ASCENDING" },
+        { "fieldPath": "state", "order": "ASCENDING" }
+      ]
+    }
+  ]
+}
