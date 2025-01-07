@@ -13,6 +13,7 @@ export default function ContactPage() {
     email: "",
     message: ""
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -20,15 +21,37 @@ export default function ContactPage() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // FIXME: send the form data to a server
-    console.log(formData)
-    toast({
-      title: "Message Sent!",
-      description: "Thank you for your message. I'll get back to you soon.",
-    })
-    setFormData({ name: "", email: "", message: "" })
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send message')
+      }
+
+      toast({
+        title: "Message Sent!",
+        description: "Thank you for your message. I'll get back to you soon.",
+      })
+      setFormData({ name: "", email: "", message: "" })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again later.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -43,22 +66,49 @@ export default function ContactPage() {
           <form onSubmit={handleSubmit} className="space-y-4 text-left">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
-              <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+              <Input 
+                id="name" 
+                name="name" 
+                value={formData.name} 
+                onChange={handleChange} 
+                required 
+                disabled={isSubmitting}
+              />
             </div>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-              <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required />
+              <Input 
+                id="email" 
+                name="email" 
+                type="email" 
+                value={formData.email} 
+                onChange={handleChange} 
+                required 
+                disabled={isSubmitting}
+              />
             </div>
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-700">Message</label>
-              <Textarea id="message" name="message" value={formData.message} onChange={handleChange} required />
+              <Textarea 
+                id="message" 
+                name="message" 
+                value={formData.message} 
+                onChange={handleChange} 
+                required 
+                disabled={isSubmitting}
+              />
             </div>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Sending..." : "Send Message"}
+            </Button>
           </form>
           <div className="mt-6 text-left">
-            <p className="text-sm font-medium text-gray-700">+61452509198 | pwei.dev@gmail.com | <a href="https://linkedin.com/in/peter-wei-it/" className="text-blue-500">linkedin.com/in/peter-wei-it/</a> </p>
-          </div>
-          <div className="mt-4"> 
-            <Button type="submit">Send Message</Button>
+            <p className="text-sm font-medium text-gray-700">
+              +61452509198 | pwei.dev@gmail.com | 
+              <a href="https://linkedin.com/in/peter-wei-it/" className="text-blue-500 ml-1">
+                linkedin.com/in/peter-wei-it/
+              </a>
+            </p>
           </div>
         </CardContent>
       </Card>
